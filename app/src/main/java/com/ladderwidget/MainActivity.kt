@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
     private fun createScreen(): View {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.arena_background)
-            setPadding(dp(20), dp(20), dp(20), 0)
+            setBackgroundResource(R.drawable.app_background)
+            setPadding(dp(20), dp(48), dp(20), 0)
         }
         root.addView(createHeader())
         content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private fun createHeader(): View = LinearLayout(this).apply {
         gravity = Gravity.CENTER_VERTICAL
         orientation = LinearLayout.HORIZONTAL
-        addView(label("FCODE LADDER", 16f, Color.rgb(255, 85, 0), bold = true).apply { letterSpacing = 0.12f },
+        addView(label("FCODE LADDER", 16f, Color.WHITE, bold = true).apply { letterSpacing = 0.12f },
             LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         teamControl = label("TEAM", 11f, Color.WHITE, bold = true).apply {
             gravity = Gravity.CENTER
@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
             setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.BLACK))
         }
         entries.forEach { entry ->
-            list.addView(createAction(entry.teamName.uppercase()) {
+            list.addView(createAction("#${entry.rank}  ${entry.teamName.uppercase()}") {
                 teamPreferences.selectTeam(entry.teamName)
                 LadderWidgetProvider.updateWidgets(this)
                 popup.dismiss()

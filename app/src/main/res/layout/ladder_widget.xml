@@ -25,7 +25,7 @@
             android:layout_weight="1"
             android:letterSpacing="0.14"
             android:text="FCODE LADDER"
-            android:textColor="#FFFF5500"
+            android:textColor="#FFFFFFFF"
             android:textSize="13sp"
             android:textStyle="bold" />
 
