@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity() {
         gravity = Gravity.CENTER_VERTICAL
         setPadding(dp(12), dp(10), dp(12), dp(10))
         if (isSelectedTeam) setBackgroundResource(R.drawable.hero_background)
-        addTableCell(entry.rank.toString(), 38, if (isSelectedTeam) Color.rgb(255, 85, 0) else Color.rgb(185, 190, 208), true, Gravity.CENTER)
+        addTableCell(entry.rank.toString(), 38, if (isSelectedTeam) Color.rgb(255, 85, 0) else Color.rgb(185, 190, 208), true)
         addTableCell(entry.rating.toInt().toString(), 74, Color.rgb(255, 217, 138), true)
         addTeamCell(entry, isSelectedTeam)
         addTableCell(entry.affiliationLabel, 220, Color.rgb(185, 190, 208), false)
