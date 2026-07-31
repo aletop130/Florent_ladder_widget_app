@@ -3,7 +3,7 @@ package com.ladderwidget
 enum class RankTreatment { GOLD, SILVER, BRONZE, ACCENT }
 
 enum class RatingTier(val colorHex: String) {
-    LEGENDARY_GRANDMASTER("#FCA5A5"),
+    LEGENDARY_GRANDMASTER("#FF5C7A"),
     GRANDMASTER("#DC2626"),
     MASTER("#EF4444"),
     CANDIDATE_MASTER("#2563EB"),
@@ -13,6 +13,9 @@ enum class RatingTier(val colorHex: String) {
     SILVER("#94A3B8"),
     BRONZE("#6B3410"),
 }
+
+/** Temporary on-device palette preview; keep false in the published app. */
+const val SHOWCASE_ALL_RATING_COLORS = false
 
 fun ratingTierFor(rating: Double): RatingTier = when {
     rating >= 3000 -> RatingTier.LEGENDARY_GRANDMASTER
@@ -25,6 +28,9 @@ fun ratingTierFor(rating: Double): RatingTier = when {
     rating >= 1300 -> RatingTier.SILVER
     else -> RatingTier.BRONZE
 }
+
+fun displayedRatingTierFor(rating: Double, rank: Int): RatingTier =
+    if (SHOWCASE_ALL_RATING_COLORS) RatingTier.entries[(rank - 1) % RatingTier.entries.size] else ratingTierFor(rating)
 
 fun rankTreatmentFor(rank: Int?): RankTreatment = when (rank) {
     1 -> RankTreatment.GOLD

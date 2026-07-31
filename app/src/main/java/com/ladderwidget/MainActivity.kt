@@ -164,14 +164,14 @@ class MainActivity : AppCompatActivity() {
         orientation = LinearLayout.HORIZONTAL
         setBackgroundResource(R.drawable.hero_background)
         setPadding(dp(14), dp(14), dp(14), dp(14))
-        addView(label(entry?.rank?.toString() ?: "—", 24f, rankNumberColor(entry?.rating), bold = true).apply {
+        addView(label(entry?.rank?.toString() ?: "—", 24f, rankNumberColor(entry), bold = true).apply {
             gravity = Gravity.CENTER
-            setBackgroundResource(ratingBadgeDrawable(entry?.rating))
+            setBackgroundResource(ratingBadgeDrawable(entry))
         }, LinearLayout.LayoutParams(dp(52), dp(52)))
         addView(LinearLayout(this@MainActivity).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), 0, 0, 0)
-            addView(label(entry?.teamName ?: selectedTeamName, 20f, ratingColor(entry?.rating), bold = true))
+            addView(label(entry?.teamName ?: selectedTeamName, 20f, ratingColor(entry), bold = true).apply { applyNeonGlow(entry) })
             addView(label(entry?.let { "${it.rating.toInt()} rating · ${it.matchesPlayed} matches" } ?: "Team not currently on the leaderboard", 13f, Color.rgb(185, 190, 208)).apply {
                 setPadding(0, dp(3), 0, 0)
             })
@@ -228,10 +228,11 @@ class MainActivity : AppCompatActivity() {
     private fun LinearLayout.addTeamCell(entry: LadderEntry, isSelectedTeam: Boolean) {
         addView(LinearLayout(this@MainActivity).apply {
             orientation = LinearLayout.VERTICAL
-            addView(label(entry.teamName, 15f, ratingColor(entry.rating), bold = isSelectedTeam).apply {
+            addView(label(entry.teamName, 15f, ratingColor(entry), bold = isSelectedTeam).apply {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 setPadding(0, 0, dp(16), 0)
+                applyNeonGlow(entry)
             })
             val flags = listOfNotNull(entry.region, entry.studentStatus).joinToString(" · ")
             if (flags.isNotBlank()) addView(label(flags.uppercase(), 10f, Color.rgb(185, 190, 208), bold = true).apply {
@@ -248,7 +249,7 @@ class MainActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(dp(width), LinearLayout.LayoutParams.WRAP_CONTENT))
     }
 
-    private fun ratingBadgeDrawable(rating: Double?): Int = when (rating?.let(::ratingTierFor)) {
+    private fun ratingBadgeDrawable(entry: LadderEntry?): Int = when (entry?.let { displayedRatingTierFor(it.rating, it.rank) }) {
         RatingTier.LEGENDARY_GRANDMASTER -> R.drawable.badge_legendary_grandmaster
         RatingTier.GRANDMASTER -> R.drawable.badge_grandmaster
         RatingTier.MASTER -> R.drawable.badge_master
@@ -261,11 +262,18 @@ class MainActivity : AppCompatActivity() {
         null -> R.drawable.chip_accent
     }
 
-    private fun ratingColor(rating: Double?): Int = rating?.let { Color.parseColor(ratingTierFor(it).colorHex) } ?: Color.WHITE
+    private fun ratingColor(entry: LadderEntry?): Int = entry?.let { Color.parseColor(displayedRatingTierFor(it.rating, it.rank).colorHex) } ?: Color.WHITE
 
-    private fun rankNumberColor(rating: Double?): Int = when (rating?.let(::ratingTierFor)) {
+    private fun rankNumberColor(entry: LadderEntry?): Int = when (entry?.let { displayedRatingTierFor(it.rating, it.rank) }) {
         RatingTier.CANDIDATE_MASTER, RatingTier.DIAMOND -> Color.WHITE
         else -> Color.rgb(20, 22, 42)
+    }
+
+    private fun TextView.applyNeonGlow(entry: LadderEntry?) {
+        if (entry?.let { displayedRatingTierFor(it.rating, it.rank) } == RatingTier.LEGENDARY_GRANDMASTER) {
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+            setShadowLayer(dp(7).toFloat(), 0f, 0f, Color.parseColor("#CCFF5C7A"))
+        }
     }
 
     private fun refreshLeaderboard() {
