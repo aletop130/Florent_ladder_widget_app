@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private fun createScreen(): View {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.BLACK)
+            setBackgroundResource(R.drawable.arena_background)
             setPadding(dp(20), dp(20), dp(20), 0)
         }
         root.addView(createHeader())

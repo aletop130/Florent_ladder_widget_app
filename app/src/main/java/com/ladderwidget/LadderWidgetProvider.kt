@@ -57,6 +57,11 @@ class LadderWidgetProvider : AppWidgetProvider() {
                 R.id.widget_refresh,
                 PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
             )
+            val launchIntent = Intent(context, MainActivity::class.java)
+            views.setOnClickPendingIntent(
+                R.id.widget_root,
+                PendingIntent.getActivity(context, 1, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
+            )
             val leaderNameIds = intArrayOf(R.id.leader1_name, R.id.leader2_name, R.id.leader3_name)
             val leaderRatingIds = intArrayOf(R.id.leader1_rating, R.id.leader2_rating, R.id.leader3_rating)
             if (snapshot == null) {
