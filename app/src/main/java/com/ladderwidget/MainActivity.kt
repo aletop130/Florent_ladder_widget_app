@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         if (entries.isEmpty()) return
         val list = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.dropdown_background)
+            setBackgroundColor(Color.BLACK)
             setPadding(dp(8), dp(8), dp(8), dp(8))
         }
         val popup = PopupWindow(this).apply {
@@ -129,14 +129,30 @@ class MainActivity : AppCompatActivity() {
                 render(isRefreshing = false, error = null)
             })
         }
-        popup.contentView = ScrollView(this).apply { addView(list) }
+        popup.contentView = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundResource(R.drawable.dropdown_background)
+            addView(label("SELECT YOUR TEAM", 11f, Color.WHITE, bold = true).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                letterSpacing = 0.12f
+                setPadding(dp(14), 0, dp(14), 0)
+                setBackgroundColor(Color.rgb(24, 24, 24))
+            }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(42)))
+            addView(ScrollView(this@MainActivity).apply { addView(list) }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+            addView(label("TAP A TEAM TO APPLY", 10f, Color.rgb(185, 190, 208), bold = true).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                letterSpacing = 0.1f
+                setPadding(dp(14), 0, dp(14), 0)
+                setBackgroundColor(Color.rgb(24, 24, 24))
+            }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(36)))
+        }
         popup.width = dp(320)
         popup.height = dp(480)
         // A separate overlay keeps the selector from moving the surrounding content.
         if (showAboveAnchor) {
             val location = IntArray(2)
             anchor.getLocationOnScreen(location)
-            val y = (location[1] - popup.height - dp(8)).coerceAtLeast(dp(56))
+            val y = (location[1] - popup.height - dp(8)).coerceAtLeast(dp(88))
             popup.showAtLocation(anchor.rootView, Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, y)
         } else {
             popup.showAsDropDown(anchor, -dp(254), dp(8))
