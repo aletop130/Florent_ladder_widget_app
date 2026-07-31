@@ -23,8 +23,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:letterSpacing="0.14"
-            android:text="LIVE LADDER"
-            android:textColor="#FFFFC24A"
+            android:text="FCODE LADDER"
+            android:textColor="#FFFF5500"
             android:textSize="13sp"
             android:textStyle="bold" />
 

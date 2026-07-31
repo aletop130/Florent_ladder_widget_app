@@ -6,7 +6,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:label="Ladder Widget"
+        android:label="Fcode Ladder"
         android:supportsRtl="true"
         android:theme="@style/Theme.LadderWidget">
         <activity
@@ -21,7 +21,7 @@
         <receiver
             android:name=".LadderWidgetProvider"
             android:exported="false"
-            android:label="Ladder Widget">
+            android:label="Fcode Ladder">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.ladderwidget.REFRESH" />

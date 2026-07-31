@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -17,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private val teamPreferences by lazy { TeamPreferences(this) }
     private lateinit var content: LinearLayout
     private lateinit var refreshControl: TextView
+    private lateinit var teamControl: TextView
     private var snapshot: LadderSnapshot? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private fun createScreen(): View {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.rgb(20, 22, 42))
+            setBackgroundColor(Color.BLACK)
             setPadding(dp(20), dp(20), dp(20), 0)
         }
         root.addView(createHeader())
@@ -46,8 +48,14 @@ class MainActivity : AppCompatActivity() {
     private fun createHeader(): View = LinearLayout(this).apply {
         gravity = Gravity.CENTER_VERTICAL
         orientation = LinearLayout.HORIZONTAL
-        addView(label("LIVE LADDER", 16f, Color.rgb(255, 194, 74), bold = true).apply { letterSpacing = 0.12f },
+        addView(label("FCODE LADDER", 16f, Color.rgb(255, 85, 0), bold = true).apply { letterSpacing = 0.12f },
             LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        teamControl = label("TEAM", 11f, Color.WHITE, bold = true).apply {
+            gravity = Gravity.CENTER
+            setBackgroundResource(R.drawable.refresh_chip)
+            setOnClickListener { showTeamMenu(this) }
+        }
+        addView(teamControl, LinearLayout.LayoutParams(dp(66), dp(38)).apply { marginEnd = dp(6) })
         refreshControl = label("REFRESH", 12f, Color.WHITE, bold = true).apply {
             gravity = Gravity.CENTER
             setBackgroundResource(R.drawable.refresh_chip)
@@ -69,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         val state = LadderScreenState.from(snapshot, selectedTeamName, isRefreshing, error)
         content.addView(label(state.statusText, 12f, Color.rgb(185, 190, 208)).apply { setPadding(0, dp(14), 0, dp(10)) })
         content.addView(createSelectedTeamCard(state.ownEntry, selectedTeamName))
-        content.addView(createAction("CHANGE TEAM") { renderTeamPicker(isRefreshing = false, error = null) })
+        content.addView(createAction("CHANGE TEAM") { showTeamMenu(teamControl) })
         content.addView(sectionLabel("FULL LEADERBOARD"))
         state.entries.forEach { content.addView(createEntryRow(it, it == state.ownEntry)) }
     }
@@ -88,14 +96,39 @@ class MainActivity : AppCompatActivity() {
         when {
             snapshot == null && isRefreshing -> content.addView(label("Loading teams...", 14f, Color.rgb(185, 190, 208)))
             snapshot == null -> content.addView(label(error ?: "Unable to load teams. Tap refresh to try again.", 14f, Color.rgb(255, 194, 74)))
-            else -> snapshot!!.entries.forEach { entry ->
-                content.addView(createAction(entry.teamName) {
-                    teamPreferences.selectTeam(entry.teamName)
-                    LadderWidgetProvider.updateWidgets(this)
-                    render(isRefreshing = false, error = null)
-                })
+            else -> {
+                lateinit var selector: View
+                selector = createAction("SELECT TEAM") { showTeamMenu(selector) }
+                content.addView(selector)
             }
         }
+    }
+
+    private fun showTeamMenu(anchor: View) {
+        val entries = snapshot?.entries.orEmpty()
+        if (entries.isEmpty()) return
+        val list = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.BLACK)
+            setPadding(dp(8), dp(8), dp(8), dp(8))
+        }
+        val popup = PopupWindow(this).apply {
+            isFocusable = true
+            isOutsideTouchable = true
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.BLACK))
+        }
+        entries.forEach { entry ->
+            list.addView(createAction(entry.teamName.uppercase()) {
+                teamPreferences.selectTeam(entry.teamName)
+                LadderWidgetProvider.updateWidgets(this)
+                popup.dismiss()
+                render(isRefreshing = false, error = null)
+            })
+        }
+        popup.contentView = ScrollView(this).apply { addView(list) }
+        popup.width = dp(320)
+        popup.height = dp(480)
+        popup.showAsDropDown(anchor, -dp(254), dp(6))
     }
 
     private fun createSelectedTeamCard(entry: LadderEntry?, selectedTeamName: String): View = LinearLayout(this).apply {
