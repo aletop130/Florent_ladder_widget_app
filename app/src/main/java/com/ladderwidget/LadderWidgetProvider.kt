@@ -78,6 +78,7 @@ class LadderWidgetProvider : AppWidgetProvider() {
             val selectedTeamName = TeamPreferences(context).selectedTeamName()
             val selectedTeam = snapshot.entries.firstOrNull { it.teamName.equals(selectedTeamName, ignoreCase = true) }
             views.setTextViewText(R.id.own_rank, selectedTeam?.rank?.toString() ?: "—")
+            views.setInt(R.id.own_rank, "setBackgroundResource", rankDrawable(selectedTeam?.rank))
             views.setTextViewText(R.id.widget_team, selectedTeam?.teamName ?: "Choose a team in the app")
             views.setTextViewText(
                 R.id.widget_summary,
@@ -90,6 +91,13 @@ class LadderWidgetProvider : AppWidgetProvider() {
             val time = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault()).format(snapshot.fetchedAt)
             views.setTextViewText(R.id.widget_updated, error?.let { "Updated $time · network error" } ?: "Updated $time · live")
             return views
+        }
+
+        private fun rankDrawable(rank: Int?): Int = when (rankTreatmentFor(rank)) {
+            RankTreatment.GOLD -> R.drawable.chip_gold
+            RankTreatment.SILVER -> R.drawable.chip_silver
+            RankTreatment.BRONZE -> R.drawable.chip_bronze
+            RankTreatment.ACCENT -> R.drawable.chip_accent
         }
     }
 }

@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -77,9 +78,11 @@ class MainActivity : AppCompatActivity() {
         val state = LadderScreenState.from(snapshot, selectedTeamName, isRefreshing, error)
         content.addView(label(state.statusText, 12f, Color.rgb(185, 190, 208)).apply { setPadding(0, dp(14), 0, dp(10)) })
         content.addView(createSelectedTeamCard(state.ownEntry, selectedTeamName))
-        content.addView(createAction("CHANGE TEAM") { showTeamMenu(teamControl) })
+        lateinit var changeTeamControl: View
+        changeTeamControl = createAction("CHANGE TEAM") { showTeamMenu(changeTeamControl, showAboveAnchor = true) }
+        content.addView(changeTeamControl)
         content.addView(sectionLabel("FULL LEADERBOARD"))
-        state.entries.forEach { content.addView(createEntryRow(it, it == state.ownEntry)) }
+        content.addView(createLeaderboard(state.entries, state.ownEntry))
     }
 
     private fun renderTeamPicker(isRefreshing: Boolean, error: String?) {
@@ -104,18 +107,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showTeamMenu(anchor: View) {
+    private fun showTeamMenu(anchor: View, showAboveAnchor: Boolean = false) {
         val entries = snapshot?.entries.orEmpty()
         if (entries.isEmpty()) return
         val list = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.BLACK)
+            setBackgroundResource(R.drawable.dropdown_background)
             setPadding(dp(8), dp(8), dp(8), dp(8))
         }
         val popup = PopupWindow(this).apply {
             isFocusable = true
             isOutsideTouchable = true
-            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.BLACK))
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+            elevation = dp(12).toFloat()
         }
         entries.forEach { entry ->
             list.addView(createAction("#${entry.rank}  ${entry.teamName.uppercase()}") {
@@ -128,7 +132,15 @@ class MainActivity : AppCompatActivity() {
         popup.contentView = ScrollView(this).apply { addView(list) }
         popup.width = dp(320)
         popup.height = dp(480)
-        popup.showAsDropDown(anchor, -dp(254), dp(6))
+        // A separate overlay keeps the selector from moving the surrounding content.
+        if (showAboveAnchor) {
+            val location = IntArray(2)
+            anchor.getLocationOnScreen(location)
+            val y = (location[1] - popup.height - dp(8)).coerceAtLeast(dp(56))
+            popup.showAtLocation(anchor.rootView, Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, y)
+        } else {
+            popup.showAsDropDown(anchor, -dp(254), dp(8))
+        }
     }
 
     private fun createSelectedTeamCard(entry: LadderEntry?, selectedTeamName: String): View = LinearLayout(this).apply {
@@ -138,7 +150,7 @@ class MainActivity : AppCompatActivity() {
         setPadding(dp(14), dp(14), dp(14), dp(14))
         addView(label(entry?.rank?.toString() ?: "—", 24f, Color.rgb(20, 22, 42), bold = true).apply {
             gravity = Gravity.CENTER
-            setBackgroundResource(R.drawable.chip_accent)
+            setBackgroundResource(rankDrawable(entry?.rank))
         }, LinearLayout.LayoutParams(dp(52), dp(52)))
         addView(LinearLayout(this@MainActivity).apply {
             orientation = LinearLayout.VERTICAL
@@ -164,23 +176,66 @@ class MainActivity : AppCompatActivity() {
         setPadding(0, dp(22), 0, dp(6))
     }
 
-    private fun createEntryRow(entry: LadderEntry, isSelectedTeam: Boolean): View = LinearLayout(this).apply {
+    private fun createLeaderboard(entries: List<LadderEntry>, ownEntry: LadderEntry?): View = HorizontalScrollView(this).apply {
+        isHorizontalScrollBarEnabled = false
+        addView(LinearLayout(this@MainActivity).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(createTableHeader())
+            entries.forEach { addView(createEntryRow(it, it == ownEntry)) }
+        }, ViewGroup.LayoutParams(dp(760), ViewGroup.LayoutParams.WRAP_CONTENT))
+    }
+
+    private fun createTableHeader(): View = tableRow().apply {
+        setPadding(dp(12), dp(8), dp(12), dp(8))
+        addTableCell("#", 38, Color.rgb(126, 130, 150), true)
+        addTableCell("RATING", 74, Color.rgb(126, 130, 150), true)
+        addTableCell("TEAM", 180, Color.rgb(126, 130, 150), true)
+        addTableCell("AFFILIATION", 220, Color.rgb(126, 130, 150), true)
+        addTableCell("MEMBERS", 220, Color.rgb(126, 130, 150), true)
+    }
+
+    private fun createEntryRow(entry: LadderEntry, isSelectedTeam: Boolean): View = tableRow().apply {
         gravity = Gravity.CENTER_VERTICAL
-        orientation = LinearLayout.HORIZONTAL
         setPadding(dp(12), dp(10), dp(12), dp(10))
         if (isSelectedTeam) setBackgroundResource(R.drawable.hero_background)
-        addView(label(entry.rank.toString(), 14f, if (isSelectedTeam) Color.rgb(255, 194, 74) else Color.rgb(185, 190, 208), bold = true).apply {
-            gravity = Gravity.CENTER
-        }, LinearLayout.LayoutParams(dp(34), dp(30)))
-        addView(label(entry.teamName, 16f, Color.rgb(237, 238, 244), bold = isSelectedTeam).apply {
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        addView(label("${entry.rating.toInt()}\n${entry.matchesPlayed} matches", 12f, Color.rgb(255, 217, 138), bold = true).apply {
-            gravity = Gravity.END
-        }, LinearLayout.LayoutParams(dp(82), LinearLayout.LayoutParams.WRAP_CONTENT))
+        addTableCell(entry.rank.toString(), 38, if (isSelectedTeam) Color.rgb(255, 85, 0) else Color.rgb(185, 190, 208), true, Gravity.CENTER)
+        addTableCell(entry.rating.toInt().toString(), 74, Color.rgb(255, 217, 138), true)
+        addTeamCell(entry, isSelectedTeam)
+        addTableCell(entry.affiliationLabel, 220, Color.rgb(185, 190, 208), false)
+        addTableCell(entry.membersLabel, 220, Color.rgb(237, 238, 244), false)
     }.apply {
-        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(3) }
+        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(2) }
+    }
+
+    private fun tableRow(): LinearLayout = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+
+    private fun LinearLayout.addTeamCell(entry: LadderEntry, isSelectedTeam: Boolean) {
+        addView(LinearLayout(this@MainActivity).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(label(entry.teamName, 15f, Color.rgb(237, 238, 244), bold = isSelectedTeam).apply {
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+            })
+            val flags = listOfNotNull(entry.region, entry.studentStatus).joinToString(" · ")
+            if (flags.isNotBlank()) addView(label(flags.uppercase(), 10f, Color.rgb(185, 190, 208), bold = true).apply {
+                setPadding(0, dp(3), 0, 0)
+            })
+        }, LinearLayout.LayoutParams(dp(180), LinearLayout.LayoutParams.WRAP_CONTENT))
+    }
+
+    private fun LinearLayout.addTableCell(text: String, width: Int, color: Int, bold: Boolean, gravity: Int = Gravity.START) {
+        addView(label(text, 12f, color, bold).apply {
+            this.gravity = gravity or Gravity.CENTER_VERTICAL
+            maxLines = 2
+            ellipsize = android.text.TextUtils.TruncateAt.END
+        }, LinearLayout.LayoutParams(dp(width), LinearLayout.LayoutParams.WRAP_CONTENT))
+    }
+
+    private fun rankDrawable(rank: Int?): Int = when (rankTreatmentFor(rank)) {
+        RankTreatment.GOLD -> R.drawable.chip_gold
+        RankTreatment.SILVER -> R.drawable.chip_silver
+        RankTreatment.BRONZE -> R.drawable.chip_bronze
+        RankTreatment.ACCENT -> R.drawable.chip_accent
     }
 
     private fun refreshLeaderboard() {

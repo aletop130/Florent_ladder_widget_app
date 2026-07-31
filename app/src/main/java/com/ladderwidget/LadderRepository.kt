@@ -12,7 +12,24 @@ data class LadderEntry(
     val teamName: String,
     val rating: Double,
     val matchesPlayed: Int,
+    val region: String? = null,
+    val studentStatus: String? = null,
+    val members: List<LadderMember> = emptyList(),
 )
+
+data class LadderMember(
+    val name: String,
+    val imageUrl: String? = null,
+    val country: String? = null,
+    val affiliation: String? = null,
+    val isStudent: Boolean? = null,
+)
+
+val LadderEntry.affiliationLabel: String
+    get() = members.mapNotNull { it.affiliation?.takeIf(String::isNotBlank) }.distinct().joinToString(" · ").ifBlank { "—" }
+
+val LadderEntry.membersLabel: String
+    get() = members.map { it.name }.filter(String::isNotBlank).joinToString(" · ").ifBlank { "—" }
 
 data class LadderSnapshot(val entries: List<LadderEntry>, val fetchedAt: Instant)
 
@@ -35,12 +52,7 @@ class LadderRepository(private val context: Context) {
                 for (index in 0 until array.length()) {
                     val item = array.getJSONObject(index)
                     add(
-                        LadderEntry(
-                            rank = index + 1,
-                            teamName = item.getString("teamName"),
-                            rating = item.getDouble("rating"),
-                            matchesPlayed = item.getInt("matchesPlayed"),
-                        ),
+                        item.toLadderEntry(index + 1),
                     )
                 }
             }
@@ -58,7 +70,7 @@ class LadderRepository(private val context: Context) {
             val array = JSONArray(body)
             val entries = (0 until array.length()).map { index ->
                 val item = array.getJSONObject(index)
-                LadderEntry(index + 1, item.getString("teamName"), item.getDouble("rating"), item.getInt("matchesPlayed"))
+                item.toLadderEntry(index + 1)
             }
             LadderSnapshot(entries, Instant.ofEpochMilli(prefs.getLong(FETCHED_AT, 0)))
         }.getOrNull()
@@ -69,5 +81,30 @@ class LadderRepository(private val context: Context) {
         private const val PREFERENCES = "ladder_cache"
         private const val CACHED_JSON = "cached_json"
         private const val FETCHED_AT = "fetched_at"
+    }
+}
+
+private fun JSONObject.toLadderEntry(rank: Int): LadderEntry = LadderEntry(
+    rank = rank,
+    teamName = getString("teamName"),
+    rating = getDouble("rating"),
+    matchesPlayed = getInt("matchesPlayed"),
+    region = optString("region").takeIf(String::isNotBlank),
+    studentStatus = optString("studentStatus").takeIf(String::isNotBlank),
+    members = optJSONArray("members")?.toLadderMembers().orEmpty(),
+)
+
+private fun JSONArray.toLadderMembers(): List<LadderMember> = buildList {
+    for (index in 0 until length()) {
+        val member = getJSONObject(index)
+        add(
+            LadderMember(
+                name = member.optString("name"),
+                imageUrl = member.optString("image").takeIf(String::isNotBlank),
+                country = member.optString("country").takeIf(String::isNotBlank),
+                affiliation = member.optString("affiliation").takeIf(String::isNotBlank),
+                isStudent = member.opt("isStudent") as? Boolean,
+            ),
+        )
     }
 }
