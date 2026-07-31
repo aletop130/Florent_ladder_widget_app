@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.LadderWidget" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#FFBF40</item>
+    </style>
+</resources>

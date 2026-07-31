@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="3dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="9dp"
+            android:background="@drawable/accent_bar" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:letterSpacing="0.14"
+            android:text="LIVE LADDER"
+            android:textColor="#FFFFC24A"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_refresh"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/refresh_chip"
+            android:contentDescription="@string/refresh"
+            android:gravity="center"
+            android:text="R"
+            android:textColor="#FFF3F4F8"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:background="@drawable/hero_background"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/own_rank"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/chip_accent"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="#FF14162A"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="13dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_team"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Loading..."
+                android:textColor="#FFF4F5F9"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#FFB9BEd0"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:letterSpacing="0.18"
+        android:text="TOP TEAMS"
+        android:textColor="#FF7E8296"
+        android:textSize="10sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <TextView android:layout_width="23dp" android:layout_height="23dp" android:background="@drawable/chip_gold" android:gravity="center" android:text="1" android:textColor="#FF14162A" android:textStyle="bold" />
+        <TextView android:id="@+id/leader1_name" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="11dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFEDEEF4" android:textSize="14sp" />
+        <TextView android:id="@+id/leader1_rating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFD98A" android:textSize="14sp" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <TextView android:layout_width="23dp" android:layout_height="23dp" android:background="@drawable/chip_silver" android:gravity="center" android:text="2" android:textColor="#FF14162A" android:textStyle="bold" />
+        <TextView android:id="@+id/leader2_name" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="11dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFEDEEF4" android:textSize="14sp" />
+        <TextView android:id="@+id/leader2_rating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFD98A" android:textSize="14sp" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <TextView android:layout_width="23dp" android:layout_height="23dp" android:background="@drawable/chip_bronze" android:gravity="center" android:text="3" android:textColor="#FF14162A" android:textStyle="bold" />
+        <TextView android:id="@+id/leader3_name" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="11dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textColor="#FFEDEEF4" android:textSize="14sp" />
+        <TextView android:id="@+id/leader3_rating" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFD98A" android:textSize="14sp" android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_updated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:text="Live data"
+        android:textColor="#FF787D93"
+        android:textSize="11sp" />
+</LinearLayout>
