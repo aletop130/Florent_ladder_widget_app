@@ -4,7 +4,8 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/robot_logo"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="Ladder Widget"
         android:supportsRtl="true"
         android:theme="@style/Theme.LadderWidget">
