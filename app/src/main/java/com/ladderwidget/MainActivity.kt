@@ -164,14 +164,14 @@ class MainActivity : AppCompatActivity() {
         orientation = LinearLayout.HORIZONTAL
         setBackgroundResource(R.drawable.hero_background)
         setPadding(dp(14), dp(14), dp(14), dp(14))
-        addView(label(entry?.rank?.toString() ?: "—", 24f, Color.rgb(20, 22, 42), bold = true).apply {
+        addView(label(entry?.rank?.toString() ?: "—", 24f, rankNumberColor(entry?.rating), bold = true).apply {
             gravity = Gravity.CENTER
-            setBackgroundResource(rankDrawable(entry?.rank))
+            setBackgroundResource(ratingBadgeDrawable(entry?.rating))
         }, LinearLayout.LayoutParams(dp(52), dp(52)))
         addView(LinearLayout(this@MainActivity).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), 0, 0, 0)
-            addView(label(entry?.teamName ?: selectedTeamName, 20f, Color.rgb(244, 245, 249), bold = true))
+            addView(label(entry?.teamName ?: selectedTeamName, 20f, ratingColor(entry?.rating), bold = true))
             addView(label(entry?.let { "${it.rating.toInt()} rating · ${it.matchesPlayed} matches" } ?: "Team not currently on the leaderboard", 13f, Color.rgb(185, 190, 208)).apply {
                 setPadding(0, dp(3), 0, 0)
             })
@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity() {
     private fun LinearLayout.addTeamCell(entry: LadderEntry, isSelectedTeam: Boolean) {
         addView(LinearLayout(this@MainActivity).apply {
             orientation = LinearLayout.VERTICAL
-            addView(label(entry.teamName, 15f, Color.rgb(237, 238, 244), bold = isSelectedTeam).apply {
+            addView(label(entry.teamName, 15f, ratingColor(entry.rating), bold = isSelectedTeam).apply {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 setPadding(0, 0, dp(16), 0)
@@ -248,11 +248,24 @@ class MainActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(dp(width), LinearLayout.LayoutParams.WRAP_CONTENT))
     }
 
-    private fun rankDrawable(rank: Int?): Int = when (rankTreatmentFor(rank)) {
-        RankTreatment.GOLD -> R.drawable.chip_gold
-        RankTreatment.SILVER -> R.drawable.chip_silver
-        RankTreatment.BRONZE -> R.drawable.chip_bronze
-        RankTreatment.ACCENT -> R.drawable.chip_accent
+    private fun ratingBadgeDrawable(rating: Double?): Int = when (rating?.let(::ratingTierFor)) {
+        RatingTier.LEGENDARY_GRANDMASTER -> R.drawable.badge_legendary_grandmaster
+        RatingTier.GRANDMASTER -> R.drawable.badge_grandmaster
+        RatingTier.MASTER -> R.drawable.badge_master
+        RatingTier.CANDIDATE_MASTER -> R.drawable.badge_candidate_master
+        RatingTier.DIAMOND -> R.drawable.badge_diamond
+        RatingTier.EMERALD -> R.drawable.badge_emerald
+        RatingTier.GOLD -> R.drawable.badge_gold
+        RatingTier.SILVER -> R.drawable.badge_silver
+        RatingTier.BRONZE -> R.drawable.badge_bronze
+        null -> R.drawable.chip_accent
+    }
+
+    private fun ratingColor(rating: Double?): Int = rating?.let { Color.parseColor(ratingTierFor(it).colorHex) } ?: Color.WHITE
+
+    private fun rankNumberColor(rating: Double?): Int = when (rating?.let(::ratingTierFor)) {
+        RatingTier.CANDIDATE_MASTER, RatingTier.DIAMOND -> Color.WHITE
+        else -> Color.rgb(20, 22, 42)
     }
 
     private fun refreshLeaderboard() {

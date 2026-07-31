@@ -78,14 +78,17 @@ class LadderWidgetProvider : AppWidgetProvider() {
             val selectedTeamName = TeamPreferences(context).selectedTeamName()
             val selectedTeam = snapshot.entries.firstOrNull { it.teamName.equals(selectedTeamName, ignoreCase = true) }
             views.setTextViewText(R.id.own_rank, selectedTeam?.rank?.toString() ?: "—")
-            views.setInt(R.id.own_rank, "setBackgroundResource", rankDrawable(selectedTeam?.rank))
+            views.setInt(R.id.own_rank, "setBackgroundResource", ratingBadgeDrawable(selectedTeam?.rating))
+            views.setTextColor(R.id.own_rank, rankNumberColor(selectedTeam?.rating))
             views.setTextViewText(R.id.widget_team, selectedTeam?.teamName ?: "Choose a team in the app")
+            views.setTextColor(R.id.widget_team, ratingColor(selectedTeam?.rating))
             views.setTextViewText(
                 R.id.widget_summary,
                 selectedTeam?.let { "${it.rating.toInt()} rating · ${it.matchesPlayed} matches" } ?: "Open the app to select a team",
             )
             snapshot.entries.take(3).forEachIndexed { index, entry ->
                 views.setTextViewText(leaderNameIds[index], entry.teamName)
+                views.setTextColor(leaderNameIds[index], ratingColor(entry.rating))
                 views.setTextViewText(leaderRatingIds[index], entry.rating.toInt().toString())
             }
             val time = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault()).format(snapshot.fetchedAt)
@@ -93,11 +96,24 @@ class LadderWidgetProvider : AppWidgetProvider() {
             return views
         }
 
-        private fun rankDrawable(rank: Int?): Int = when (rankTreatmentFor(rank)) {
-            RankTreatment.GOLD -> R.drawable.chip_gold
-            RankTreatment.SILVER -> R.drawable.chip_silver
-            RankTreatment.BRONZE -> R.drawable.chip_bronze
-            RankTreatment.ACCENT -> R.drawable.chip_accent
+        private fun ratingBadgeDrawable(rating: Double?): Int = when (rating?.let(::ratingTierFor)) {
+            RatingTier.LEGENDARY_GRANDMASTER -> R.drawable.badge_legendary_grandmaster
+            RatingTier.GRANDMASTER -> R.drawable.badge_grandmaster
+            RatingTier.MASTER -> R.drawable.badge_master
+            RatingTier.CANDIDATE_MASTER -> R.drawable.badge_candidate_master
+            RatingTier.DIAMOND -> R.drawable.badge_diamond
+            RatingTier.EMERALD -> R.drawable.badge_emerald
+            RatingTier.GOLD -> R.drawable.badge_gold
+            RatingTier.SILVER -> R.drawable.badge_silver
+            RatingTier.BRONZE -> R.drawable.badge_bronze
+            null -> R.drawable.chip_accent
+        }
+
+        private fun ratingColor(rating: Double?): Int = rating?.let { android.graphics.Color.parseColor(ratingTierFor(it).colorHex) } ?: android.graphics.Color.WHITE
+
+        private fun rankNumberColor(rating: Double?): Int = when (rating?.let(::ratingTierFor)) {
+            RatingTier.CANDIDATE_MASTER, RatingTier.DIAMOND -> android.graphics.Color.WHITE
+            else -> android.graphics.Color.rgb(20, 22, 42)
         }
     }
 }

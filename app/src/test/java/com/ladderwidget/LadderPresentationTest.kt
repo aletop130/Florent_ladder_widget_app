@@ -5,6 +5,19 @@ import org.junit.Test
 
 class LadderPresentationTest {
     @Test
+    fun `rating thresholds map to the league rank tiers`() {
+        assertEquals(RatingTier.LEGENDARY_GRANDMASTER, ratingTierFor(3000.0))
+        assertEquals(RatingTier.GRANDMASTER, ratingTierFor(2500.0))
+        assertEquals(RatingTier.MASTER, ratingTierFor(2300.0))
+        assertEquals(RatingTier.CANDIDATE_MASTER, ratingTierFor(2100.0))
+        assertEquals(RatingTier.DIAMOND, ratingTierFor(1900.0))
+        assertEquals(RatingTier.EMERALD, ratingTierFor(1700.0))
+        assertEquals(RatingTier.GOLD, ratingTierFor(1500.0))
+        assertEquals(RatingTier.SILVER, ratingTierFor(1300.0))
+        assertEquals(RatingTier.BRONZE, ratingTierFor(1299.0))
+    }
+
+    @Test
     fun `podium ranks use their respective visual treatments`() {
         assertEquals(RankTreatment.GOLD, rankTreatmentFor(1))
         assertEquals(RankTreatment.SILVER, rankTreatmentFor(2))
