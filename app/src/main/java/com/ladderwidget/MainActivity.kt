@@ -231,6 +231,7 @@ class MainActivity : AppCompatActivity() {
             addView(label(entry.teamName, 15f, Color.rgb(237, 238, 244), bold = isSelectedTeam).apply {
                 maxLines = 1
                 ellipsize = android.text.TextUtils.TruncateAt.END
+                setPadding(0, 0, dp(16), 0)
             })
             val flags = listOfNotNull(entry.region, entry.studentStatus).joinToString(" · ")
             if (flags.isNotBlank()) addView(label(flags.uppercase(), 10f, Color.rgb(185, 190, 208), bold = true).apply {
